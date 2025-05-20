@@ -1,47 +1,51 @@
-/*
-*
-*
-*       Complete the API routing below
-*       
-*       
-*/
+"use strict"
 
-'use strict';
+// throwaway database
+let db = {}
+let db_index = 0
 
 module.exports = function (app) {
+   app.route("/api/books")
+      .get(function (req, res){
+         res.send(Object.values(db))
+      })
+      .post(function (req, res){
+         const title = req.body.title
+         if(!title) {res.send("missing required field title")}
+         else {
+            const _id = String(db_index)
+            db_index += 1
+            const comments = []
+            const commentcount = 0
+            db[_id] = {_id, title, commentcount, comments}
+            res.send(db[_id])
+         }
+      })
+      .delete(function(req, res){
+         db = {}
+         db_index = 0
+         res.send("complete delete successful")
+      })
 
-  app.route('/api/books')
-    .get(function (req, res){
-      //response will be array of book objects
-      //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
-    })
-    
-    .post(function (req, res){
-      let title = req.body.title;
-      //response will contain new book object including atleast _id and title
-    })
-    
-    .delete(function(req, res){
-      //if successful response will be 'complete delete successful'
-    });
-
-
-
-  app.route('/api/books/:id')
-    .get(function (req, res){
-      let bookid = req.params.id;
-      //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
-    })
-    
-    .post(function(req, res){
-      let bookid = req.params.id;
-      let comment = req.body.comment;
-      //json res format same as .get
-    })
-    
-    .delete(function(req, res){
-      let bookid = req.params.id;
-      //if successful response will be 'delete successful'
-    });
-  
-};
+   app.route("/api/books/:id")
+      .get(function (req, res){
+         const _id = req.params.id
+         if (!_id) {res.send("no book exists")}
+         else {res.send(db[_id])}
+      })
+      .post(function(req, res){
+         const _id = req.params.id
+         const comment = req.body.comment
+         if (!_id) {res.send("no book exists")}
+         else if (!comment) {res.send("missing required field comment")}
+         else {res.send(db[_id])}
+      })
+      .delete(function(req, res){
+         const _id = req.params.id
+         if (!_id) {res.send("no book exists")}
+         else {
+            delete db[_id]
+            res.send("delete successful")
+         }
+      }) 
+}
