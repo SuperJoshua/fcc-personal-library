@@ -38,10 +38,10 @@ suite("Functional Tests", function() {
          test("Test POST /api/books with title", function(done) {
             chai.request(server)
             .post("/api/books")
-            .send()
+            .send({"title": "Book #1"})
             .end(function(err, res) {
                assert.equal(res.status, 200)
-
+               assert.equal(res.body.title, "Book #1")
                done()
             })
          })
@@ -49,9 +49,10 @@ suite("Functional Tests", function() {
          test("Test POST /api/books with no title given", function(done) {
             chai.request(server)
             .post("/api/books")
-            .send()
+            .send({})
             .end(function(err, res) {
                assert.equal(res.status, 200)
+               assert.equal(res.text, "missing required field title")
                done()
             })
          })
@@ -72,10 +73,10 @@ suite("Functional Tests", function() {
       suite("GET /api/books/[id] => book object with [id]", function() {
          test("Test GET /api/books/[id] with id not in db", function(done) {
             chai.request(server)
-            .post("/api/books/44")
-            .send()
+            .get("/api/books/44")
             .end(function(err, res) {
                assert.equal(res.status, 200)
+               assert.equal(res.text, "no book exists")
                done()
             })
          })
@@ -84,6 +85,7 @@ suite("Functional Tests", function() {
             .get("/api/books/0")
             .end(function(err, res) {
                assert.equal(res.status, 200)
+               assert.equal(res.body._id, "0")
                done()
             })
          })
@@ -93,9 +95,12 @@ suite("Functional Tests", function() {
          test("Test POST /api/books/[id] with comment", function(done) {
             chai.request(server)
             .post("/api/books/0")
-            .send()
+            .send({"id": "0", "comment": "Good book."})
             .end(function(err, res) {
                assert.equal(res.status, 200)
+               assert.equal(res.body._id, "0")
+               assert.isArray(res.body.comments)
+               assert.isTrue(res.body.comments.length > 0)
                done()
             })
          })
@@ -103,9 +108,10 @@ suite("Functional Tests", function() {
          test("Test POST /api/books/[id] without comment field", function(done) {
             chai.request(server)
             .post("/api/books/0")
-            .send()
+            .send({"id": "0"})
             .end(function(err, res) {
                assert.equal(res.status, 200)
+               assert.equal(res.text, "missing required field comment")
                done()
             })
          })
@@ -113,9 +119,10 @@ suite("Functional Tests", function() {
          test("Test POST /api/books/[id] with comment, id not in db", function(done) {
             chai.request(server)
             .post("/api/books/44")
-            .send()
+            .send({"id": "44", "comment": "Middling Book."})
             .end(function(err, res) {
                assert.equal(res.status, 200)
+               assert.equal(res.text, "no book exists")
                done()
             })
          })
@@ -125,9 +132,10 @@ suite("Functional Tests", function() {
          test("Test DELETE /api/books/[id] with valid id in db", function(done) {
             chai.request(server)
             .delete("/api/books/0")
-            .send()
+            .send({"id": "0"})
             .end(function(err, res) {
                assert.equal(res.status, 200)
+               assert.equal(res.text, "delete successful")
                done()
             })
          })
@@ -135,9 +143,10 @@ suite("Functional Tests", function() {
          test("Test DELETE /api/books/[id] with id not in db", function(done) {
             chai.request(server)
             .delete("/api/books/44")
-            .send()
+            .send({"id": "44"})
             .end(function(err, res) {
                assert.equal(res.status, 200)
+               assert.equal(res.text, "no book exists")
                done()
             })
          })

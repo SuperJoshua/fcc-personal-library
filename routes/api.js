@@ -11,7 +11,7 @@ module.exports = function (app) {
       })
       .post(function (req, res){
          const title = req.body.title
-         if(!title) {res.send("missing required field title")}
+         if (!title) {res.send("missing required field title")}
          else {
             const _id = String(db_index)
             db_index += 1
@@ -30,19 +30,23 @@ module.exports = function (app) {
    app.route("/api/books/:id")
       .get(function (req, res){
          const _id = req.params.id
-         if (!_id) {res.send("no book exists")}
+         if (!db[_id]) {res.send("no book exists")}
          else {res.send(db[_id])}
       })
       .post(function(req, res){
          const _id = req.params.id
          const comment = req.body.comment
-         if (!_id) {res.send("no book exists")}
+         if (!db[_id]) {res.send("no book exists")}
          else if (!comment) {res.send("missing required field comment")}
-         else {res.send(db[_id])}
+         else {
+            db[_id].comments.push(comment)
+            db[_id].commentcount += 1
+            res.send(db[_id])
+         }
       })
       .delete(function(req, res){
          const _id = req.params.id
-         if (!_id) {res.send("no book exists")}
+         if (!db[_id]) {res.send("no book exists")}
          else {
             delete db[_id]
             res.send("delete successful")
